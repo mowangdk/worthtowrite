@@ -1,20 +1,20 @@
 import numbers
 
 
-@ensure('title', is_non_empty_str)
-@ensure('isbn', is_valid_isbn)
-@ensure('price', is_in_range(1, 10000))
-@ensure('title', is_in_range(0, 1000000))
-class Book(object):
-    def __init__(self, title, isbn, price, quantity):
-        self.title = title
-        self.isbn = isbn
-        self.price = price
-        self.quantity = quantity
+# ensure函数会以给定的属性名,验证器函数以及可选的docstring为参数来创造类修饰器
+def ensure(name, validate, doc=None):
+    def decorator(Class):
+        privateName = '__'+name
 
-    @property
-    def value(self):
-        return self.price * self.quantity
+        def getter(self):
+            return getattr(self, privateName)
+
+        def setter(self, value):
+            validate(name, value)
+            return setattr(self, privateName, value)
+        setattr(Class, name, property(getter, setter, doc=doc))
+        return Class
+    return decorator
 
 
 # 这个验证器是用来确保book和title的属性不是空字符串
@@ -39,18 +39,17 @@ def is_in_range(minimum=None, maxinum=None):
     return is_in_range
 
 
-# ensure函数会以给定的属性名,验证器函数以及可选的docstring为参数来创造类修饰器
-def ensure(name, validate, doc=None):
-    def decorator(Class):
+@ensure('title', is_non_empty_str)
+@ensure('price', is_in_range(1, 10000))
+@ensure('title', is_in_range(0, 1000000))
+class Book(object):
+    def __init__(self, title, price, quantity):
+        self.title = title
+        self.price = price
+        self.quantity = quantity
 
-        privateName = '__'+name
+    @property
+    def value(self):
+        return self.price * self.quantity
 
-        def getter(self):
-            return getattr(self, privateName)
 
-        def setter(self, value):
-            validate(name, value)
-            return setattr(self, privateName, value)
-        setattr(Class, name, property(getter, setter, doc=doc))
-        return Class
-    return decorator

@@ -1,3 +1,20 @@
+import numbers
+
+
+def do_ensure(Class):
+    def make_property(name, attribute):
+        private_name = "__"+name
+        def getter(self):
+            return getattr(self, private_name)
+        def setter(self, value):
+            attribute.validate(name, value)
+            return setattr(self, private_name, value)
+        return property(getter, setter, doc=attribute.doc)
+    for name, attribute in Class.__dict__.items():
+        if isinstance(attribute, Ensure):
+            setattr(Class, name, make_property(name, attribute))
+    return Class
+
 
 @do_ensure
 class Book:
@@ -42,20 +59,6 @@ class Ensure(object):
         self.validate = validate
         self.doc = doc
 
-
-def do_ensure(Class):
-    def make_property(name, attribute):
-        private_name = "__"+name
-        def getter(self):
-            return getattr(self, private_name)
-        def setter(self, value):
-            attribute.validate(name, value)
-            return setattr(self, private_name, value)
-        return property(getter, setter, doc=attribute.doc)
-    for name, attribute in Class.__dict__.items():
-        if isinstance(attribute, Ensure):
-            setattr(Class, name, make_property(name, attribute))
-    return Class
 
 
 
