@@ -7,6 +7,7 @@ class Solution(object):
         n = len(words)
         elements = [0] * n
         # 也可以使用set() & set() 但是效率较低,处理大量的数组的时候会出现超时
+        # 所以这里将字符串装换成数字, 判断在一个bit位上的数字是否相同
         for i, s in enumerate(words):
             for c in s:
                 elements[i] |= 1 << (ord(c) - 97)
