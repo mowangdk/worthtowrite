@@ -6,6 +6,7 @@ import sys
 import re
 import traceback
 
+import time
 from splinter.browser import Browser
 
 
@@ -29,9 +30,29 @@ def work():
         # 章节练习
         browser.click_link_by_partial_href('new/set_template_parameters?tname=danyuanceshi')    # success# success
         # first page
-        home_windows = browser.windows.current
-
+        home_window = browser.windows.current
         chapter_chuti()
+
+        # 知识点出题
+        browser.windows.current = browser.windows[0]
+        browser.click_link_by_partial_href('new/set_template_parameters?tname=zhuanxiang')
+        browser.windows.current = browser.windows[2]
+
+        first_tree = browser.find_by_id('k_tag_tree')[0].find_by_tag('div')[0]
+        second_tree = browser.find_by_id('k_tag_tree')[0].find_by_tag('div')[1]
+
+        if not browser.is_element_not_present_by_tag('div', wait_time=0.5):
+            for level1 in first_tree.find_by_tag('div'):
+                level1.click()
+                level1.find_by_tag('input')[0].check()
+                if not browser.is_element_not_present_by_tag('div', wait_time=0.2):
+                    for level2 in second_tree.find_by_tag('div'):
+                        level2.click()
+
+
+
+
+
 
         # browser.click_link_by_text('第二章  基本初等函数（I）')
         # # test find password
@@ -58,11 +79,12 @@ def chapter_chuti():
     sec_level = unit_textbook_tree.find_by_id('sec_level')
     for unit_text in unit_textbook.find_by_tag('label'):
         unit_text.click()
-        for href in sec_level.find_by_tag('a'):
-            href.click()
-            # third_level = unit_textbook_tree.find_by_id('thi_level')
-            # map(lambda x: x.check(), [checkbox for checkbox in third_level.find_by_tag('input')])
-            unit_textbook_tree.find_by_id('check_all').first.check()
+        if not browser.is_element_not_present_by_tag('a', wait_time=0.5): # keep from element is not attached to the page document
+            for href in sec_level.find_by_tag('a'):
+                href.click()
+                # third_level = unit_textbook_tree.find_by_id('thi_level')
+                # map(lambda x: x.check(), [checkbox for checkbox in third_level.find_by_tag('input')])
+                unit_textbook_tree.find_by_id('check_all').first.check()
     browser.find_by_id('template_next').first.click()
 
 
